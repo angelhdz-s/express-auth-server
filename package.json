@@ -1,33 +1,35 @@
 {
-  "name": "express-auth-server",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [],
-  "homepage": "https://github.com/angelhdz-s/express-auth-server#readme",
-  "bugs": {
-    "url": "https://github.com/angelhdz-s/express-auth-server/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/angelhdz-s/express-auth-server.git"
-  },
-  "license": "ISC",
-  "author": "angelhdz-s",
-  "type": "module",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch index.ts"
-  },
-  "packageManager": "pnpm@10.28.0",
-  "dependencies": {
-    "express": "5.2.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.0.6",
-    "@types/express": "5.0.6",
-    "@types/node": "25.3.0",
-    "tsx": "4.21.0",
-    "typescript": "5.9.3"
-  }
+	"name": "express-auth-server",
+	"version": "1.0.0",
+	"description": "",
+	"keywords": [],
+	"homepage": "https://github.com/angelhdz-s/express-auth-server#readme",
+	"bugs": {
+		"url": "https://github.com/angelhdz-s/express-auth-server/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/angelhdz-s/express-auth-server.git"
+	},
+	"license": "ISC",
+	"author": "angelhdz-s",
+	"type": "module",
+	"main": "index.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "node --watch index.ts"
+	},
+	"packageManager": "pnpm@10.28.0",
+	"dependencies": {
+		"dotenv": "^17.3.1",
+		"express": "5.2.1",
+		"mongoose": "^9.2.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.0.6",
+		"@types/express": "5.0.6",
+		"@types/node": "25.3.0",
+		"tsx": "4.21.0",
+		"typescript": "5.9.3"
+	}
 }
