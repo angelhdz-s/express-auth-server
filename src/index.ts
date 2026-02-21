@@ -1,8 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import cors from "express";
+import bcrypt from "bcrypt";
 import { connectDB } from "./config/db.js";
 import { Failure, Success } from "./utils/result.js";
+import { User } from "./models/user.js";
 
 const app = express();
 const PORT = 3001;
@@ -45,12 +47,47 @@ app.get("/user", (_req, res) => {
 	);
 });
 
-app.post("/login", (_req, res) => {
+app.post("/login", async (req, res) => {
+	if (!req.body || !req.body.username || !req.body.password)
+		return res.json(
+			Failure({
+				code: 403,
+				message:
+					"Bad request: missing body {username} and/or {password}",
+			}),
+		);
+
+	const user = await User.findOne({ username: req.body.username });
+	if (!user)
+		return res.json(
+			Failure({
+				code: 400,
+				message: "Wrong username or password",
+			}),
+		);
+
+	const isPasswordCorrect = bcrypt.compareSync(
+		req.body.password,
+		user.password,
+	);
+
+	if (!isPasswordCorrect)
+		return res.json(
+			Failure({
+				code: 400,
+				message: "Wrong username or password",
+			}),
+		);
+
 	res.json(
 		Success({
 			code: 200,
-			message: "Index",
-			data: null,
+			message: "Logged In Successfuly",
+			data: {
+				username: user.username,
+				email: user.email,
+				name: user.name,
+			},
 		}),
 	);
 });
