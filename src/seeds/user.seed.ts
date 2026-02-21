@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { connectDB } from "../config/db.ts";
-import { User } from "../models/user.ts";
+import { connectDB } from "../config/db.js";
+import { User } from "../models/user.js";
 import bcrypt from "bcrypt";
 
 export async function seedUsers() {
