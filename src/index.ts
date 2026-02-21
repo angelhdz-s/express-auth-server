@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { connectDB } from "./config/db.js";
-import { Success } from "./utils/result.js";
+import { Failure, Success } from "./utils/result.js";
 
 const app = express();
 const PORT = 3001;
@@ -52,10 +52,9 @@ app.post("/register", (_req, res) => {
 
 app.use((_req, res) => {
 	res.json(
-		Success({
+		Failure({
 			code: 404,
 			message: "Content not found",
-			data: null,
 		}),
 	);
 });
