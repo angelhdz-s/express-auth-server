@@ -17,6 +17,18 @@ app.get("/user", (_req, res) => {
 	res.send("Hello World");
 });
 
+app.post("/login", (_req, res) => {
+	res.send("Hello World");
+});
+
+app.post("/register", (_req, res) => {
+	res.send("Hello World");
+});
+
+app.use((_req, res) => {
+	res.json({ code: 404, message: "Content not found" });
+});
+
 app.listen(PORT, () => {
 	console.log(`Example app listening on port ${PORT}`);
 });
