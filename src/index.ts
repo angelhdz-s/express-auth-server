@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import cors from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -14,46 +14,22 @@ import {
 	SECRET_JWT_KEY,
 	TOKEN_KEY,
 } from "./config/constants.js";
+import { validateJsonFormatMiddleware } from "./middlewares/json-format-validation.middleware.js";
+import { tokenSessionMiddleware } from "./middlewares/token-session.middleware.js";
 
 const app = express();
 const PORT = 3001;
 
 await connectDB();
 
+// Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 
-app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-	if (err instanceof SyntaxError && "body" in err) {
-		return res.status(400).json(
-			Failure({
-				code: 400,
-				message: "Invalid JSON format",
-			}),
-		);
-	}
-
-	next();
-});
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-	req.session = { user: null };
-	if (!SECRET_JWT_KEY)
-		return res.json(
-			Failure({
-				code: 500,
-				message: "Secret was not found",
-			}),
-		);
-	const token = req.cookies?.[TOKEN_KEY];
-	if (token) {
-		const data = jwt.verify(token, SECRET_JWT_KEY);
-		if (data) req.session.user = data;
-	}
-
-	next();
-});
+// Custom middlerares
+app.use(validateJsonFormatMiddleware);
+app.use(tokenSessionMiddleware);
 
 app.get("/", (req: Request, res: Response) => {
 	const { user } = req.session;
