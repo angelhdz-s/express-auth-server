@@ -32,7 +32,7 @@ app.use(tokenSessionMiddleware);
 
 app.get("/", (req: Request, res: Response) => {
 	const { user } = req.session;
-	res.json(
+	res.status(200).json(
 		Success({
 			code: 200,
 			message: "Index",
@@ -44,9 +44,9 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/profile", (req: Request, res: Response) => {
 	const { user } = req.session;
 
-	if (!user) return res.status(402).redirect("/");
+	if (!user) return res.status(400).redirect("/");
 
-	res.json(
+	res.status(200).json(
 		Success({
 			code: 200,
 			message: "Profile",
@@ -60,9 +60,9 @@ app.post("/login", async (req: Request, res: Response) => {
 	if (user) return res.status(400).redirect("/");
 
 	if (!req.body || !req.body.username || !req.body.password)
-		return res.json(
+		return res.status(400).json(
 			Failure({
-				code: 403,
+				code: 400,
 				message:
 					"Bad request: missing body {username} and/or {password}",
 			}),
@@ -70,7 +70,7 @@ app.post("/login", async (req: Request, res: Response) => {
 
 	const userData = await User.findOne({ username: req.body.username });
 	if (!userData)
-		return res.json(
+		return res.status(400).json(
 			Failure({
 				code: 400,
 				message: "Wrong username or password",
@@ -85,14 +85,14 @@ app.post("/login", async (req: Request, res: Response) => {
 	const { username, email, name } = userData;
 
 	if (!isPasswordCorrect)
-		return res.json(
+		return res.status(400).json(
 			Failure({
 				code: 400,
 				message: "Wrong username or password",
 			}),
 		);
 	if (!SECRET_JWT_KEY)
-		return res.json(
+		return res.status(500).json(
 			Failure({
 				code: 500,
 				message: "Secret was not found",
@@ -117,6 +117,7 @@ app.post("/login", async (req: Request, res: Response) => {
 			secure: IS_PRODUCTION,
 			sameSite: true,
 		})
+		.status(200)
 		.json(
 			Success({
 				code: 200,
@@ -140,7 +141,7 @@ app.post("/register", async (req: Request, res: Response) => {
 		!req.body.email ||
 		!req.body.password
 	)
-		return res.json(
+		return res.status(400).json(
 			Failure({
 				code: 400,
 				message: "Missing body {name} {username} {email} {password}",
@@ -187,17 +188,20 @@ app.get("/logout", async (req: Request, res: Response) => {
 	const token = req.cookies[TOKEN_KEY];
 	if (!token) return res.status(400).redirect("/");
 
-	return res.clearCookie(TOKEN_KEY).json(
-		Success({
-			code: 200,
-			message: "Logout successful",
-			data: null,
-		}),
-	);
+	return res
+		.clearCookie(TOKEN_KEY)
+		.status(200)
+		.json(
+			Success({
+				code: 200,
+				message: "Logout successful",
+				data: null,
+			}),
+		);
 });
 
 app.use((_req: Request, res: Response) => {
-	res.json(
+	res.status(404).json(
 		Failure({
 			code: 404,
 			message: "Content not found",
