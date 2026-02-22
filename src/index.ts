@@ -55,7 +55,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 	next();
 });
 
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
 	const { user } = req.session;
 	res.json(
 		Success({
@@ -66,7 +66,7 @@ app.get("/", (req, res) => {
 	);
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", (req: Request, res: Response) => {
 	const { user } = req.session;
 
 	if (!user) return res.status(402).redirect("/");
@@ -80,7 +80,7 @@ app.get("/profile", (req, res) => {
 	);
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login", async (req: Request, res: Response) => {
 	const { user } = req.session;
 	if (user) return res.status(400).redirect("/");
 
@@ -155,7 +155,7 @@ app.post("/login", async (req, res) => {
 		);
 });
 
-app.post("/register", async (req, res) => {
+app.post("/register", async (req: Request, res: Response) => {
 	const { user } = req.session;
 	if (user) return res.status(400).redirect("/");
 	if (
@@ -208,7 +208,7 @@ app.post("/register", async (req, res) => {
 	);
 });
 
-app.get("/logout", async (req, res) => {
+app.get("/logout", async (req: Request, res: Response) => {
 	const token = req.cookies[TOKEN_KEY];
 	if (!token) return res.status(400).redirect("/");
 
@@ -221,7 +221,7 @@ app.get("/logout", async (req, res) => {
 	);
 });
 
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
 	res.json(
 		Failure({
 			code: 404,
