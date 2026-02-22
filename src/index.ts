@@ -18,7 +18,6 @@ import { validateJsonFormatMiddleware } from "./middlewares/json-format-validati
 import { tokenSessionMiddleware } from "./middlewares/token-session.middleware.js";
 
 const app = express();
-const PORT = 3001;
 
 await connectDB();
 
