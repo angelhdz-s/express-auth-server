@@ -1,11 +1,19 @@
 import "dotenv/config";
 import express from "express";
+import type { NextFunction, Request, Response } from "express";
 import cors from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import { Failure, Success } from "./utils/result.js";
 import { User } from "./models/user.model.js";
-import { SALT } from "./config/constants.js";
+import {
+	IS_PRODUCTION,
+	SALT,
+	SECRET_JWT_KEY,
+	TOKEN_KEY,
+} from "./config/constants.js";
 
 const app = express();
 const PORT = 3001;
@@ -14,8 +22,9 @@ await connectDB();
 
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 
-app.use((err: any, _req: any, res: any, next: any) => {
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
 	if (err instanceof SyntaxError && "body" in err) {
 		return res.status(400).json(
 			Failure({
@@ -25,30 +34,56 @@ app.use((err: any, _req: any, res: any, next: any) => {
 		);
 	}
 
-	next(err);
+	next();
 });
 
-app.get("/", (_req, res) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
+	req.session = { user: null };
+	if (!SECRET_JWT_KEY)
+		return res.json(
+			Failure({
+				code: 500,
+				message: "Secret was not found",
+			}),
+		);
+	const token = req.cookies?.[TOKEN_KEY];
+	if (token) {
+		const data = jwt.verify(token, SECRET_JWT_KEY);
+		if (data) req.session.user = data;
+	}
+
+	next();
+});
+
+app.get("/", (req, res) => {
+	const { user } = req.session;
 	res.json(
 		Success({
 			code: 200,
 			message: "Index",
-			data: null,
+			data: user,
 		}),
 	);
 });
 
-app.get("/user", (_req, res) => {
+app.get("/profile", (req, res) => {
+	const { user } = req.session;
+
+	if (!user) return res.status(402).redirect("/");
+
 	res.json(
 		Success({
 			code: 200,
-			message: "Index",
-			data: null,
+			message: "Profile",
+			data: user,
 		}),
 	);
 });
 
 app.post("/login", async (req, res) => {
+	const { user } = req.session;
+	if (user) return res.status(400).redirect("/");
+
 	if (!req.body || !req.body.username || !req.body.password)
 		return res.json(
 			Failure({
@@ -58,8 +93,8 @@ app.post("/login", async (req, res) => {
 			}),
 		);
 
-	const user = await User.findOne({ username: req.body.username });
-	if (!user)
+	const userData = await User.findOne({ username: req.body.username });
+	if (!userData)
 		return res.json(
 			Failure({
 				code: 400,
@@ -69,8 +104,10 @@ app.post("/login", async (req, res) => {
 
 	const isPasswordCorrect = bcrypt.compareSync(
 		req.body.password,
-		user.password,
+		userData.password,
 	);
+
+	const { username, email, name } = userData;
 
 	if (!isPasswordCorrect)
 		return res.json(
@@ -79,21 +116,48 @@ app.post("/login", async (req, res) => {
 				message: "Wrong username or password",
 			}),
 		);
+	if (!SECRET_JWT_KEY)
+		return res.json(
+			Failure({
+				code: 500,
+				message: "Secret was not found",
+			}),
+		);
 
-	res.json(
-		Success({
-			code: 200,
-			message: "Logged In Successfuly",
-			data: {
-				username: user.username,
-				email: user.email,
-				name: user.name,
-			},
-		}),
+	const token = jwt.sign(
+		{
+			username,
+			name,
+			email,
+		},
+		SECRET_JWT_KEY,
+		{ expiresIn: "1h" },
 	);
+
+	console.log(token);
+
+	return res
+		.cookie(TOKEN_KEY, token, {
+			httpOnly: true,
+			secure: IS_PRODUCTION,
+			sameSite: true,
+		})
+		.json(
+			Success({
+				code: 200,
+				message: "Logged In Successfuly",
+				data: {
+					username: userData.username,
+					email: userData.email,
+					name: userData.name,
+				},
+			}),
+		);
 });
 
 app.post("/register", async (req, res) => {
+	const { user } = req.session;
+	if (user) return res.status(400).redirect("/");
 	if (
 		!req.body ||
 		!req.body.username ||
@@ -140,6 +204,19 @@ app.post("/register", async (req, res) => {
 			code: 200,
 			message: "User created successfuly",
 			data: newUser,
+		}),
+	);
+});
+
+app.get("/logout", async (req, res) => {
+	const token = req.cookies[TOKEN_KEY];
+	if (!token) return res.status(400).redirect("/");
+
+	return res.clearCookie(TOKEN_KEY).json(
+		Success({
+			code: 200,
+			message: "Logout successful",
+			data: null,
 		}),
 	);
 });
