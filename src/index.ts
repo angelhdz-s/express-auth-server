@@ -5,7 +5,6 @@ import cors from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import { connectDB } from "./config/db.js";
 import { Failure, Success } from "./utils/result.js";
 import { User } from "./models/user.model.js";
 import {
@@ -18,8 +17,6 @@ import { validateJsonFormatMiddleware } from "./middlewares/json-format-validati
 import { tokenSessionMiddleware } from "./middlewares/token-session.middleware.js";
 
 const app = express();
-
-await connectDB();
 
 // Middlewares
 app.use(express.json());
