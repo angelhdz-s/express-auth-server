@@ -1,13 +1,10 @@
 import "dotenv/config";
-import { connectDB } from "../config/db.js";
 import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import { SALT } from "../config/constants.js";
 
 export async function seedUsers() {
 	try {
-		await connectDB();
-
 		await User.deleteMany();
 		console.log("Users deleted");
 
@@ -37,12 +34,7 @@ export async function seedUsers() {
 				name: "Barras",
 			},
 		]);
-
-		process.exit(1);
 	} catch (e) {
 		console.log(e);
-		process.exit(1);
 	}
 }
-
-await seedUsers();

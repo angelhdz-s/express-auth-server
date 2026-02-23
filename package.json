@@ -14,11 +14,11 @@
 	"license": "ISC",
 	"author": "angelhdz-s",
 	"type": "module",
-	"main": "index.ts",
+	"main": "src/index.ts",
 	"scripts": {
 		"test": "vitest",
 		"dev": "tsx --watch src/server.ts",
-		"seed": "tsx src/seeds/user.seed.ts"
+		"seed": "tsx src/seeds/index.seed.ts"
 	},
 	"packageManager": "pnpm@10.28.0",
 	"dependencies": {
