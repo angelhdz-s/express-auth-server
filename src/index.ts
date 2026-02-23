@@ -41,7 +41,7 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/profile", (req: Request, res: Response) => {
 	const { user } = req.session;
 
-	if (!user) return res.status(400).redirect("/");
+	if (!user) return res.status(401).redirect("/");
 
 	res.status(200).json(
 		Success({
@@ -54,7 +54,7 @@ app.get("/profile", (req: Request, res: Response) => {
 
 app.post("/login", async (req: Request, res: Response) => {
 	const { user } = req.session;
-	if (user) return res.status(400).redirect("/");
+	if (user) return res.status(403).redirect("/");
 
 	if (!req.body || !req.body.username || !req.body.password)
 		return res.status(400).json(
@@ -108,18 +108,16 @@ app.post("/login", async (req: Request, res: Response) => {
 		{ expiresIn: "1h" },
 	);
 
-	console.log(token);
-
 	return res
 		.cookie(TOKEN_KEY, token, {
 			httpOnly: true,
 			secure: IS_PRODUCTION,
 			sameSite: true,
 		})
-		.status(200)
+		.status(202)
 		.json(
 			Success({
-				code: 200,
+				code: 202,
 				message: "Logged In Successfuly",
 				data: {
 					username: userData.username,
@@ -132,7 +130,7 @@ app.post("/login", async (req: Request, res: Response) => {
 
 app.post("/register", async (req: Request, res: Response) => {
 	const { user } = req.session;
-	if (user) return res.status(400).redirect("/");
+	if (user) return res.status(403).redirect("/");
 	if (
 		!req.body ||
 		!req.body.username ||
@@ -157,9 +155,9 @@ app.post("/register", async (req: Request, res: Response) => {
 		let message = `Username {${username}} and email {${email}} already exist`;
 		if (!emailExists) message = `Username {${username}"} already exists`;
 		if (!usernameExists) message = `Email {${email}} already exists`;
-		return res.status(400).json(
+		return res.status(409).json(
 			Failure({
-				code: 400,
+				code: 409,
 				message,
 			}),
 		);
@@ -174,9 +172,9 @@ app.post("/register", async (req: Request, res: Response) => {
 		password: passwordHash,
 	});
 
-	return res.status(200).json(
+	return res.status(201).json(
 		Success({
-			code: 200,
+			code: 201,
 			message: "User created successfuly",
 			data: newUser,
 		}),
@@ -185,14 +183,14 @@ app.post("/register", async (req: Request, res: Response) => {
 
 app.get("/logout", async (req: Request, res: Response) => {
 	const token = req.cookies[TOKEN_KEY];
-	if (!token) return res.status(400).redirect("/");
+	if (!token) return res.status(401).redirect("/");
 
 	return res
 		.clearCookie(TOKEN_KEY)
-		.status(200)
+		.status(202)
 		.json(
 			Success({
-				code: 200,
+				code: 202,
 				message: "Logout successful",
 				data: null,
 			}),
