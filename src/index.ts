@@ -65,7 +65,9 @@ app.post("/login", async (req: Request, res: Response) => {
 			}),
 		);
 
-	const userData = await User.findOne({ username: req.body.username });
+	const userData = await User.findOne({
+		username: req.body.username.trim().toLowerCase(),
+	});
 	if (!userData)
 		return res.status(400).json(
 			Failure({
